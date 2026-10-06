@@ -321,4 +321,26 @@ class FilesystemTest extends TestCase
 
         $this->assertFalse(file_exists($this->dirPath));
     }
+
+    /**
+     * Test symlink.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testSymlink()
+    {
+        $link = 'my_link';
+
+        $this->filesystem->create($this->path);
+
+        $this->filesystem->symlink($this->path, $link);
+
+        $this->assertTrue(file_exists($link));
+        $this->assertTrue(is_link($link));
+
+        if (file_exists($link)) {
+            unlink($link);
+        }
+    }
 }

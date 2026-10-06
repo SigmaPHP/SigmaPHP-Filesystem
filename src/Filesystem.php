@@ -222,4 +222,16 @@ class Filesystem implements FilesystemInterface
         // delete the dir
         return rmdir($path);
     }
+
+    /**
+     * Create a symlink for a file.
+     *
+     * @param string $src
+     * @param string $dest
+     * @return bool
+     */
+    public function symlink($src, $dest)
+    {
+        return symlink($src, $dest);
+    }
 }

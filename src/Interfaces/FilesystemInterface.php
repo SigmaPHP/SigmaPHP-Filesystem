@@ -123,4 +123,13 @@ interface FilesystemInterface
      * @return bool
      */
     public function removeDir($path);
+
+    /**
+     * Create a symlink for a file.
+     *
+     * @param string $src
+     * @param string $dest
+     * @return bool
+     */
+    public function symlink($src, $dest);
 }
