@@ -95,12 +95,14 @@ class Filesystem implements FilesystemInterface
      * Create file.
      *
      * @param string $path
+     * @param string $content
      * @param int $permission
      * @return bool
      */
-    public function create($path, $permission = 0755)
+    public function create($path, $content = '', $permission = 0755)
     {
-        return touch($path) & chmod($path, $permission);
+        return touch($path) & chmod($path, $permission) &
+            (bool) file_put_contents($path, $content);
     }
 
     /**
@@ -233,5 +235,98 @@ class Filesystem implements FilesystemInterface
     public function symlink($src, $dest)
     {
         return symlink($src, $dest);
+    }
+
+    /**
+     * Concatenate paths.
+     *
+     * @param string ...$paths
+     * @return string
+     */
+    public function concatPath(...$paths) {
+        $finalPath = '';
+
+        foreach ($paths as $path) {
+            $finalPath .= $path . DIRECTORY_SEPARATOR;
+        }
+
+        return rtrim($finalPath, DIRECTORY_SEPARATOR);
+    }
+
+    /**
+     * Add extension to file's name.
+     *
+     * @param string $filename
+     * @param string $extension
+     * @return string
+     */
+    public function addExtension($filename, $extension)
+    {
+        return $filename . '.' . $extension;
+    }
+
+    /**
+     * Remove extension from file's name.
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function removeExtension($filename)
+    {
+        return (strpos($filename, '.') !== false) ?
+            explode('.', $filename)[0] :
+            $filename;
+    }
+
+    /**
+     * Get file's name from path.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function getFileName($path)
+    {
+        if (strpos($path, '/') !== false) {
+            $parts = explode('/', $path);
+            return $parts[count($parts) - 1];
+        }
+
+        return $path;
+    }
+
+    /**
+     * Change file's mode.
+     *
+     * @param string $path
+     * @param int $permissions octal value
+     * @return bool
+     */
+    public function changeMode($path, $permissions)
+    {
+        return chmod($path, $permissions);
+    }
+
+    /**
+     * Change file's group.
+     *
+     * @param string $path
+     * @param string|int $group
+     * @return bool
+     */
+    public function changeGroup($path, $group)
+    {
+        return chgrp($path, $group);
+    }
+
+    /**
+     * Change file's owner.
+     *
+     * @param string $path
+     * @param string|int $user
+     * @return bool
+     */
+    public function changeOwner($path, $user)
+    {
+        return chown($path, $user);
     }
 }

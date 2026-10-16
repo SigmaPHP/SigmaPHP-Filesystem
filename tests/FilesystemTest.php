@@ -47,6 +47,19 @@ class FilesystemTest extends TestCase
         $this->newPath = __DIR__ . '/dump.txt';
 
         $this->dirPath = __DIR__ . '/examples';
+
+        // create the dummy files and directories
+        if (!file_exists($this->path)) {
+            touch($this->path);
+        }
+
+        if (!file_exists($this->newPath)) {
+            touch($this->newPath);
+        }
+
+        if (!file_exists($this->dirPath)) {
+            mkdir($this->dirPath);
+        }
     }
 
     /**
@@ -59,16 +72,16 @@ class FilesystemTest extends TestCase
         parent::tearDown();
 
         // remove the dummy files and directories
-        if (file_exists(__DIR__ . '/testing.txt')) {
-            unlink(__DIR__ . '/testing.txt');
+        if (file_exists($this->path)) {
+            unlink($this->path);
         }
 
-        if (file_exists(__DIR__ . '/dump.txt')) {
-            unlink(__DIR__ . '/dump.txt');
+        if (file_exists($this->newPath)) {
+            unlink($this->newPath);
         }
 
-        if (file_exists(__DIR__ . '/examples')) {
-            rmdir(__DIR__ . '/examples');
+        if (file_exists($this->dirPath)) {
+            rmdir($this->dirPath);
         }
     }
 
@@ -151,6 +164,10 @@ class FilesystemTest extends TestCase
      */
     public function testCreateFile()
     {
+        if (file_exists($this->path)) {
+            unlink($this->path);
+        }
+
         $this->filesystem->create($this->path);
 
         $this->assertTrue(file_exists($this->path));
@@ -162,6 +179,23 @@ class FilesystemTest extends TestCase
     }
 
     /**
+     * Test create file with content.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testCreateFileWithContent()
+    {
+        if (file_exists($this->path)) {
+            unlink($this->path);
+        }
+
+        $this->filesystem->create($this->path, 'test');
+
+        $this->assertEquals('test', file_get_contents($this->path));
+    }
+
+    /**
      * Test rename file.
      *
      * @runInSeparateProcess
@@ -169,8 +203,6 @@ class FilesystemTest extends TestCase
      */
     public function testRenameFile()
     {
-        $this->filesystem->create($this->path);
-
         $this->filesystem->rename($this->path, $this->newPath);
 
         $this->assertTrue(file_exists($this->newPath));
@@ -185,8 +217,6 @@ class FilesystemTest extends TestCase
      */
     public function testCopyFile()
     {
-        $this->filesystem->create($this->path);
-
         $this->filesystem->copy($this->path, $this->newPath);
 
         $this->assertTrue(file_exists($this->newPath));
@@ -201,8 +231,6 @@ class FilesystemTest extends TestCase
      */
     public function testMoveFile()
     {
-        $this->filesystem->create($this->path);
-
         $this->filesystem->move($this->path, $this->newPath);
 
         $this->assertTrue(file_exists($this->newPath));
@@ -217,8 +245,6 @@ class FilesystemTest extends TestCase
      */
     public function testRemoveFile()
     {
-        $this->filesystem->create($this->path);
-
         $this->filesystem->remove($this->path);
 
         $this->assertFalse(file_exists($this->path));
@@ -232,8 +258,6 @@ class FilesystemTest extends TestCase
      */
     public function testWriteToFile()
     {
-        $this->filesystem->create($this->path);
-
         $this->filesystem->write($this->path, 'Hello SigmaPHP!');
 
         $this->assertEquals('Hello SigmaPHP!', file_get_contents($this->path));
@@ -247,9 +271,7 @@ class FilesystemTest extends TestCase
      */
     public function testAppendToFile()
     {
-        $this->filesystem->create($this->path);
-
-        $this->filesystem->write($this->path, 'Hello ');
+        file_put_contents($this->path, 'Hello ');
 
         $this->filesystem->append($this->path, 'SigmaPHP!');
 
@@ -264,9 +286,7 @@ class FilesystemTest extends TestCase
      */
     public function testReadFromFile()
     {
-        $this->filesystem->create($this->path);
-
-        $this->filesystem->write($this->path, 'Hello SigmaPHP!');
+        file_put_contents($this->path, 'Hello SigmaPHP!');
 
         $this->assertEquals(
             'Hello SigmaPHP!',
@@ -282,6 +302,10 @@ class FilesystemTest extends TestCase
      */
     public function testCreateDirectory()
     {
+        if (file_exists($this->dirPath)) {
+            rmdir($this->dirPath);
+        }
+
         $this->filesystem->createDir($this->dirPath);
 
         $this->assertTrue(file_exists($this->dirPath));
@@ -296,8 +320,6 @@ class FilesystemTest extends TestCase
      */
     public function testRemoveDirectory()
     {
-        $this->filesystem->createDir($this->dirPath);
-
         $this->filesystem->removeDir($this->dirPath);
 
         $this->assertFalse(file_exists($this->dirPath));
@@ -311,10 +333,6 @@ class FilesystemTest extends TestCase
      */
     public function testRemoveNonEmptyDirectory()
     {
-        $this->filesystem->createDir($this->dirPath);
-
-        $this->filesystem->create($this->path);
-
         $this->filesystem->move($this->path, $this->dirPath . '/testing.txt');
 
         $this->filesystem->removeDir($this->dirPath);
@@ -332,8 +350,6 @@ class FilesystemTest extends TestCase
     {
         $link = 'my_link';
 
-        $this->filesystem->create($this->path);
-
         $this->filesystem->symlink($this->path, $link);
 
         $this->assertTrue(file_exists($link));
@@ -342,5 +358,111 @@ class FilesystemTest extends TestCase
         if (file_exists($link)) {
             unlink($link);
         }
+    }
+
+    /**
+     * Test concatenate paths.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testConcatenatePaths()
+    {
+        $this->assertEquals(
+            __DIR__ . DIRECTORY_SEPARATOR .
+            'path' . DIRECTORY_SEPARATOR .
+            'to' . DIRECTORY_SEPARATOR .
+            'somewhere',
+            $this->filesystem->concatPath(
+                __DIR__,
+                'path',
+                'to',
+                'somewhere'
+            )
+        );
+    }
+
+    /**
+     * Test add extension.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testAddExtension()
+    {
+        $this->assertEquals(
+            'script.min.js',
+            $this->filesystem->addExtension('script', 'min.js')
+        );
+    }
+
+    /**
+     * Test remove extension.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRemoveExtension()
+    {
+        $this->assertEquals(
+            'script',
+            $this->filesystem->removeExtension('script.min.js')
+        );
+    }
+
+    /**
+     * Test get file name.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testGetFileName()
+    {
+        $this->assertEquals(
+            'script.min.js',
+            $this->filesystem->getFileName('/path/to/assets/js/script.min.js')
+        );
+    }
+
+    /**
+     * Test change file's mode.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testChangeFileMode()
+    {
+        $this->filesystem->changeMode($this->path, 0666);
+
+        $this->assertEquals(
+            '0666',
+            substr(sprintf('%o', fileperms($this->path)), -4)
+        );
+    }
+
+    /**
+     * Test change file's group.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testChangeFileGroup()
+    {
+        $this->assertTrue(
+            $this->filesystem->changeGroup($this->path, getmygid())
+        );
+    }
+
+    /**
+     * Test change file's owner.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testChangeFileOwner()
+    {
+        $this->assertTrue(
+            $this->filesystem->changeOwner($this->path, getmyuid())
+        );
     }
 }

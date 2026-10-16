@@ -38,10 +38,11 @@ interface FilesystemInterface
      * Create file.
      *
      * @param string $path
+     * @param string $content
      * @param int $permission
      * @return bool
      */
-    public function create($path, $permission);
+    public function create($path, $content, $permission);
 
     /**
      * Rename files and directories.
@@ -132,4 +133,64 @@ interface FilesystemInterface
      * @return bool
      */
     public function symlink($src, $dest);
+
+    /**
+     * Concatenate paths.
+     *
+     * @param string ...$paths
+     * @return string
+     */
+    public function concatPath(...$paths);
+
+    /**
+     * Add extension to file's name.
+     *
+     * @param string $filename
+     * @param string $extension
+     * @return string
+     */
+    public function addExtension($filename, $extension);
+
+    /**
+     * Remove extension from file's name.
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function removeExtension($filename);
+
+    /**
+     * Get file's name from path.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function getFileName($path);
+
+    /**
+     * Change file's mode.
+     *
+     * @param string $path
+     * @param int $permissions octal value
+     * @return bool
+     */
+    public function changeMode($path, $permissions);
+
+    /**
+     * Change file's group.
+     *
+     * @param string $path
+     * @param string|int $group
+     * @return bool
+     */
+    public function changeGroup($path, $group);
+
+    /**
+     * Change file's owner.
+     *
+     * @param string $path
+     * @param string|int $user
+     * @return bool
+     */
+    public function changeOwner($path, $user);
 }
