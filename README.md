@@ -14,7 +14,7 @@ composer require sigmaphp/sigmaphp-filesystem
 
 ### Basic Usage
 
-The `Filesystem` class provides the implementation of `FilesystemInterface` and can be instantiated directly when filesystem operations are required.
+The `Filesystem` class can be instantiated directly when filesystem operations are required.
 
 ```php
 <?php
@@ -292,6 +292,156 @@ $filesystem->removeDir(
 | `$path`   | `string` | The directory path to remove. |
 
 Returns `true` when the directory and its contents are removed successfully.
+### `symlink()`
+
+Creates a symbolic link to a file.
+
+```php
+$filesystem->symlink(
+    '/var/www/project/config.php',
+    '/var/www/project/config-link.php'
+);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$src` | `string` | The path to the source file. |
+| `$dest` | `string` | The destination path where the symbolic link will be created. |
+
+Returns `true` if the symbolic link is created successfully, or `false` otherwise.
+
+### `concatPath()`
+
+Concatenates multiple path segments into a single path string.
+
+```php
+$path = $filesystem->concatPath(
+    '/var/www/project',
+    'storage',
+    'logs',
+    'app.log'
+);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$paths` | `string ...` | A variable number of path segments to concatenate. |
+
+Returns the concatenated path as a string.
+
+### `addExtension()`
+
+Adds an extension to a file's name.
+
+```php
+$filename = $filesystem->addExtension(
+    'document',
+    'pdf'
+);
+
+// Result: document.pdf
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$filename` | `string` | The file name to which the extension will be added. |
+| `$extension` | `string` | The extension to add. |
+
+Returns the file name with the specified extension.
+
+### `removeExtension()`
+
+Removes the extension from a file's name.
+
+```php
+$filename = $filesystem->removeExtension(
+    'document.pdf'
+);
+
+// Result: document
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$filename` | `string` | The file name from which the extension will be removed. |
+
+Returns the file name without its extension.
+
+### `getFileName()`
+
+Extracts the file name from a path.
+
+```php
+$filename = $filesystem->getFileName(
+    '/var/www/project/config.php'
+);
+
+// Result: config.php
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$path` | `string` | The file path from which to extract the file name. |
+
+Returns the extracted file name as a string.
+
+### `changeMode()`
+
+Changes the permissions of a file or directory using an octal permission value.
+
+```php
+$filesystem->changeMode(
+    '/var/www/project/storage',
+    0755
+);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$path` | `string` | The path to the file or directory. |
+| `$permissions` | `int` | The permissions to assign, specified as an octal value. |
+
+Returns `true` if the permissions are changed successfully, or `false` otherwise.
+
+In this example, `0755` grants the owner read, write, and execute permissions, while the group and other users receive read and execute permissions.
+
+### `changeGroup()`
+
+Changes the group ownership of a file or directory.
+
+```php
+$filesystem->changeGroup(
+    '/var/www/project/storage',
+    'www-data'
+);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$path` | `string` | The path to the file or directory. |
+| `$group` | `string\|int` | The group name or group ID to assign. |
+
+Returns `true` if the group is changed successfully, or `false` otherwise.
+
+### `changeOwner()`
+
+Changes the owner of a file or directory.
+
+```php
+$filesystem->changeOwner(
+    '/var/www/project/storage',
+    'www-data'
+);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `$path` | `string` | The path to the file or directory. |
+| `$user` | `string\|int` | The user name or user ID to assign as the owner. |
+
+Returns `true` if the owner is changed successfully, or `false` otherwise.
+
+**Note:** Changing file permissions, group ownership, or owner depends on the operating system and the privileges of the executing user. These operations may fail if the process does not have sufficient permissions.
 
 ## License
 (SigmaPHP-Filesystem) released under the terms of the MIT license.
