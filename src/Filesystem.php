@@ -287,10 +287,10 @@ class Filesystem implements FilesystemInterface
 
         $_filename = $filename;
 
-        // handle first slash
-        $startWithSlash = false;
-        if ($filename[0] == '/') {
-            $startWithSlash = true;
+        // handle first DS
+        $startWithDS = false;
+        if ($filename[0] == DIRECTORY_SEPARATOR) {
+            $startWithDS = true;
         }
 
         $path = $this->getPath($filename);
@@ -317,7 +317,7 @@ class Filesystem implements FilesystemInterface
             $filename = implode('.', $parts);
         }
 
-        return $startWithSlash ?
+        return $startWithDS ?
             $this->concatPath($path, $filename) :
             ltrim($this->concatPath($path, $filename), DIRECTORY_SEPARATOR);
     }
@@ -334,7 +334,11 @@ class Filesystem implements FilesystemInterface
             strpos(trim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR)
             !== false
         ) {
-            $parts = explode(DIRECTORY_SEPARATOR, $path);
+            $parts = explode(
+                DIRECTORY_SEPARATOR,
+                trim($path, DIRECTORY_SEPARATOR)
+            );
+
             return $parts[count($parts) - 1];
         }
 
@@ -353,10 +357,19 @@ class Filesystem implements FilesystemInterface
             strpos(trim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR)
             !== false
         ) {
+            // handle first DS
+            $startWithDS = false;
+            if ($path[0] == DIRECTORY_SEPARATOR) {
+                $startWithDS = true;
+            }
+
             $parts = explode(DIRECTORY_SEPARATOR, $path);
+
             unset($parts[count($parts) - 1]);
 
-            return $this->concatPath(...$parts);
+            return $startWithDS ?
+                $this->concatPath(...$parts) :
+                ltrim($this->concatPath(...$parts), DIRECTORY_SEPARATOR);
         }
 
         return $path;
