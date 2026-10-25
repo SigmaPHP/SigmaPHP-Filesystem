@@ -465,4 +465,16 @@ class FilesystemTest extends TestCase
             $this->filesystem->changeOwner($this->path, getmyuid())
         );
     }
+
+    /**
+     * Test check is directory.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testCheckIsDirectory()
+    {
+        $this->assertFalse($this->filesystem->isDir($this->path));
+        $this->assertTrue($this->filesystem->isDir($this->dirPath));
+    }
 }

@@ -329,4 +329,15 @@ class Filesystem implements FilesystemInterface
     {
         return chown($path, $user);
     }
+
+    /**
+     * Check if a path is a directory.
+     *
+     * @param string $path
+     * @return bool
+     */
+    public function isDir($path)
+    {
+        return is_dir($path);
+    }
 }

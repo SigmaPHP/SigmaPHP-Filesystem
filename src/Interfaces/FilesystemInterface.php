@@ -193,4 +193,12 @@ interface FilesystemInterface
      * @return bool
      */
     public function changeOwner($path, $user);
+
+    /**
+     * Check if a path is a directory.
+     *
+     * @param string $path
+     * @return bool
+     */
+    public function isDir($path);
 }
