@@ -13,9 +13,10 @@ interface FilesystemInterface
      * @param string $path
      * @param bool $includeFullPath
      * @param bool $withExtension
+     * @param bool $filesOnly
      * @return array<string>
      */
-    public function list($path, $includeFullPath, $withExtension);
+    public function list($path, $includeFullPath, $withExtension, $filesOnly);
 
     /**
      * Check if a path exists.
@@ -155,9 +156,10 @@ interface FilesystemInterface
      * Remove extension from file's name.
      *
      * @param string $filename
+     * @param string $extension
      * @return string
      */
-    public function removeExtension($filename);
+    public function removeExtension($filename, $extension = '');
 
     /**
      * Get file's name from path.
@@ -166,6 +168,14 @@ interface FilesystemInterface
      * @return string
      */
     public function getFileName($path);
+
+    /**
+     * Get path only from a full file path.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function getPath($path);
 
     /**
      * Change file's mode.

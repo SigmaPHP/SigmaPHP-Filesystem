@@ -94,18 +94,24 @@ class FilesystemTest extends TestCase
     public function testListFiles()
     {
         $this->assertEquals([
+            '.gitkeep',
+            '4',
             '2.txt',
             '3.txt',
             '1.txt',
         ], $this->filesystem->list(__DIR__ . '/test_dir'));
 
         $this->assertEquals([
+            __DIR__ . '/test_dir/4/.gitkeep',
+            __DIR__ . '/test_dir/4',
             __DIR__ . '/test_dir/2.txt',
             __DIR__ . '/test_dir/3.txt',
             __DIR__ . '/test_dir/1.txt',
         ], $this->filesystem->list(__DIR__ . '/test_dir', true));
 
         $this->assertEquals([
+            '.gitkeep',
+            '4',
             '2',
             '3',
             '1',
@@ -115,6 +121,13 @@ class FilesystemTest extends TestCase
             [__DIR__ . '/test_dir/1.txt'],
             $this->filesystem->list(__DIR__ . '/test_dir/1.txt')
         );
+
+        $this->assertEquals([
+            '.gitkeep',
+            '2.txt',
+            '3.txt',
+            '1.txt',
+        ], $this->filesystem->list(__DIR__ . '/test_dir', false, true, true));
     }
 
     /**
@@ -397,6 +410,20 @@ class FilesystemTest extends TestCase
     }
 
     /**
+     * Test add extension will not work on directories.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testAddExtensionWillNotWorkOnDirectories()
+    {
+        $this->assertEquals(
+            $this->dirPath,
+            $this->filesystem->addExtension($this->dirPath, 'min.js')
+        );
+    }
+
+    /**
      * Test remove extension.
      *
      * @runInSeparateProcess
@@ -405,8 +432,61 @@ class FilesystemTest extends TestCase
     public function testRemoveExtension()
     {
         $this->assertEquals(
-            'script',
+            'script.min',
             $this->filesystem->removeExtension('script.min.js')
+        );
+
+        $this->assertEquals(
+            '/storage/cache/views/2026.1.1/8302183018230813',
+            $this->filesystem->removeExtension(
+                '/storage/cache/views/2026.1.1/8302183018230813'
+            )
+        );
+    }
+
+    /**
+     * Test remove extension from dotted path.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRemoveExtensionFromDottedPath()
+    {
+        $this->assertEquals(
+            'seeders/2026.1.1/v1.0/Users.seeder.old',
+            $this->filesystem->removeExtension(
+                'seeders/2026.1.1/v1.0/Users.seeder.old.php'
+            )
+        );
+    }
+
+    /**
+     * Test remove specified extension.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRemoveSpecifiedExtension()
+    {
+        $this->assertEquals(
+            'script',
+            $this->filesystem->removeExtension('script.min.js', 'min.js')
+        );
+    }
+
+    /**
+     * Test remove extension will not affect dot-files.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRemoveExtensionWillNotAffectDotFiles()
+    {
+        $this->assertEquals(
+            '/path/to/root/of/my/project/.env.example',
+            $this->filesystem->removeExtension(
+                '/path/to/root/of/my/project/.env.example'
+            )
         );
     }
 
@@ -421,6 +501,48 @@ class FilesystemTest extends TestCase
         $this->assertEquals(
             'script.min.js',
             $this->filesystem->getFileName('/path/to/assets/js/script.min.js')
+        );
+    }
+
+    /**
+     * Test get file name will not work on single part path.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testGetFileNameWillNotWorkOnSinglePartPath()
+    {
+        $this->assertEquals(
+            '/my-uploads',
+            $this->filesystem->getFileName("/my-uploads")
+        );
+    }
+
+    /**
+     * Test get path.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testGetPath()
+    {
+        $this->assertEquals(
+            '/path/to/assets/js',
+            $this->filesystem->getPath('/path/to/assets/js/script.min.js')
+        );
+    }
+
+    /**
+     * Test get path will not work on single part path.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testGetPathWillNotWorkOnSinglePartPath()
+    {
+        $this->assertEquals(
+            "my-uploads/",
+            $this->filesystem->getPath("my-uploads/")
         );
     }
 

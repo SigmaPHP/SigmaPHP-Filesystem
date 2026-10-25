@@ -16,10 +16,15 @@ class Filesystem implements FilesystemInterface
      * @param string $path
      * @param bool $includeFullPath
      * @param bool $withExtension
+     * @param bool $filesOnly
      * @return array<string>
      */
-    public function list($path, $includeFullPath = false, $withExtension = true)
-    {
+    public function list(
+        $path,
+        $includeFullPath = false,
+        $withExtension = true,
+        $filesOnly = false,
+    ) {
         if (!file_exists($path)) {
             throw new PathNotFoundException("The path {$path} doesn't exist!");
         }
@@ -41,17 +46,16 @@ class Filesystem implements FilesystemInterface
         ) as $file) {
             $_file = $file->getRealPath();
 
+            if ($filesOnly && $this->isDir($_file)) {
+                continue;
+            }
+
             if (!$includeFullPath) {
-                $_file = str_replace($path . '/', '', $_file);
+                $_file = $this->getFileName($_file);
             }
 
             if (!$withExtension) {
-                $_ext = str_replace($path . '/', '', $_file);
-
-                // check not a dot-file
-                if ($_ext[0] != '.') {
-                    $_file = explode('.', $_ext)[0];
-                }
+                $_file = $this->removeExtension($_file);
             }
 
             $files[] = $_file;
@@ -257,20 +261,65 @@ class Filesystem implements FilesystemInterface
      */
     public function addExtension($filename, $extension)
     {
+        if ($this->isDir($filename)) {
+            return $filename;
+        }
+
         return $filename . '.' . $extension;
     }
 
     /**
      * Remove extension from file's name.
      *
+     * Please Note: for files with sub types like script.min.js, unless you
+     * clearly specify that 'min.js' is a whole extension, this method will only
+     * remove the '.js' part!
+     *
      * @param string $filename
+     * @param string $extension
      * @return string
      */
-    public function removeExtension($filename)
+    public function removeExtension($filename, $extension = '')
     {
-        return (strpos($filename, '.') !== false) ?
-            explode('.', $filename)[0] :
-            $filename;
+        if ($this->isDir($filename)) {
+            return $filename;
+        }
+
+        $_filename = $filename;
+
+        // handle first slash
+        $startWithSlash = false;
+        if ($filename[0] == '/') {
+            $startWithSlash = true;
+        }
+
+        $path = $this->getPath($filename);
+        $filename = $this->getFileName($filename);
+
+        // if dot-file, skip
+        if ($filename[0] == '.') {
+            return $_filename;
+        }
+
+        // in case no path, only filename
+        if ($path == $filename) {
+            $path = '';
+        }
+
+        if (!empty($extension)) {
+            return rtrim(str_replace($extension, '', $filename), '.');
+        }
+
+        if (strpos($filename, '.') !== false) {
+            $parts = explode('.', $filename);
+            unset($parts[count($parts) - 1]);
+
+            $filename = implode('.', $parts);
+        }
+
+        return $startWithSlash ?
+            $this->concatPath($path, $filename) :
+            ltrim($this->concatPath($path, $filename), DIRECTORY_SEPARATOR);
     }
 
     /**
@@ -281,9 +330,33 @@ class Filesystem implements FilesystemInterface
      */
     public function getFileName($path)
     {
-        if (strpos($path, '/') !== false) {
-            $parts = explode('/', $path);
+        if (
+            strpos(trim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR)
+            !== false
+        ) {
+            $parts = explode(DIRECTORY_SEPARATOR, $path);
             return $parts[count($parts) - 1];
+        }
+
+        return $path;
+    }
+
+    /**
+     * Get path only from a full file path.
+     *
+     * @param string $path
+     * @return string
+     */
+    public function getPath($path)
+    {
+        if (
+            strpos(trim($path, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR)
+            !== false
+        ) {
+            $parts = explode(DIRECTORY_SEPARATOR, $path);
+            unset($parts[count($parts) - 1]);
+
+            return $this->concatPath(...$parts);
         }
 
         return $path;
