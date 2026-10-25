@@ -155,6 +155,10 @@ interface FilesystemInterface
     /**
      * Remove extension from file's name.
      *
+     * Please Note: for files with sub types like script.min.js, unless you
+     * clearly specify that 'min.js' is a whole extension, this method will only
+     * remove the '.js' part!
+     *
      * @param string $filename
      * @param string $extension
      * @return string

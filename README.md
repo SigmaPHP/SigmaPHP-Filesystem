@@ -60,11 +60,12 @@ echo $content;
 
 ### `list()`
 
-Lists all files inside a directory and its sub-directories.
+Lists all files inside a path and its sub-directories. You can optionally list files only, include full paths, or exclude file extensions.
 
 ```php
 $files = $filesystem->list(
     '/var/www/project',
+    true,
     true,
     true
 );
@@ -75,8 +76,9 @@ $files = $filesystem->list(
 | `$path`            | `string` | The directory path to search.                   |
 | `$includeFullPath` | `bool`   | Whether to include the full path for each file. |
 | `$withExtension`   | `bool`   | Whether to include file extensions.             |
+| `$filesOnly`       | `bool`   | Whether to list files only, excluding directories. |
 
-Returns an array of file paths or file names.
+Returns an array of file paths or file names, depending on the provided options.
 
 ### `exists()`
 
@@ -292,6 +294,23 @@ $filesystem->removeDir(
 | `$path`   | `string` | The directory path to remove. |
 
 Returns `true` when the directory and its contents are removed successfully.
+
+### `isDir()`
+
+Checks whether a given path points to a directory.
+
+```php
+$isDirectory = $filesystem->isDir(
+    '/var/www/project'
+);
+```
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `$path`   | `string` | The path to check. |
+
+Returns `true` if the path is a directory, or `false` otherwise.
+
 ### `symlink()`
 
 Creates a symbolic link to a file.
@@ -351,7 +370,9 @@ Returns the file name with the specified extension.
 
 ### `removeExtension()`
 
-Removes the extension from a file's name.
+Removes an extension from a file's name. By default, the method removes the last extension. You can specify a custom extension to remove, including compound extensions.
+
+**Please note:** For files with multiple extensions, such as `script.min.js`, the method removes only `.js` by default. To remove the entire `min.js` extension, you must explicitly specify it.
 
 ```php
 $filename = $filesystem->removeExtension(
@@ -359,13 +380,27 @@ $filename = $filesystem->removeExtension(
 );
 
 // Result: document
+
+$filename = $filesystem->removeExtension(
+    'script.min.js'
+);
+
+// Result: script.min
+
+$filename = $filesystem->removeExtension(
+    'script.min.js',
+    'min.js'
+);
+
+// Result: script
 ```
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `$filename` | `string` | The file name from which the extension will be removed. |
+| Parameter    | Type     | Default | Description |
+| ------------ | -------- | ------- | ----------- |
+| `$filename`  | `string` | —       | The file name from which the extension will be removed. |
+| `$extension` | `string` | `''`    | The extension to remove. If empty, only the last extension is removed. |
 
-Returns the file name without its extension.
+Returns the file name without the specified extension or, if none is provided, without its last extension.
 
 ### `getFileName()`
 
@@ -384,6 +419,24 @@ $filename = $filesystem->getFileName(
 | `$path` | `string` | The file path from which to extract the file name. |
 
 Returns the extracted file name as a string.
+
+### `getPath()`
+
+Extracts the directory path from a full file path.
+
+```php
+$path = $filesystem->getPath(
+    '/var/www/project/document.pdf'
+);
+
+// Result: /var/www/project
+```
+
+| Parameter | Type     | Description |
+| --------- | -------- | ----------- |
+| `$path`   | `string` | The full file path from which the directory path will be extracted. |
+
+Returns the directory path as a string.
 
 ### `changeMode()`
 
