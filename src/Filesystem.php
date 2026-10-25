@@ -243,14 +243,9 @@ class Filesystem implements FilesystemInterface
      * @param string ...$paths
      * @return string
      */
-    public function concatPath(...$paths) {
-        $finalPath = '';
-
-        foreach ($paths as $path) {
-            $finalPath .= $path . DIRECTORY_SEPARATOR;
-        }
-
-        return rtrim($finalPath, DIRECTORY_SEPARATOR);
+    public function concatPath(...$paths)
+    {
+        return implode(DIRECTORY_SEPARATOR, $paths);
     }
 
     /**
